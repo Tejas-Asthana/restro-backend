@@ -17,6 +17,8 @@ let users = [
   },
 ];
 
+// $2a$10$yHLGBzUzES5InsEnY8umHOUb4O2SvNfqfMWZrqEEK1t49.BRMcOBe
+
 bcrypt.genSalt(10, (err, salt) => {
   if (err) throw err;
   bcrypt.hash(users[0].password, salt, (err, hash) => {

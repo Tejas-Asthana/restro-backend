@@ -2,6 +2,8 @@
 const express = require("express");
 var cors = require("cors");
 
+let { db } = require("./firebase");
+
 let registerUser = require("./api/admin/registerUser.js");
 let authUser = require("./api/admin/authUser.js");
 let addMenu = require("./api/admin/addMenu.js");
@@ -31,6 +33,93 @@ app.use("/api/admin/getReviews", authMiddleware, getReviews);
 
 app.get("/privatePage", authMiddleware, (req, res) => {
   res.status(200).send("User autherized");
+});
+
+const docId = "2nNdQjVfCpq4VIbg4pmm";
+const testUser = db.collection("users").doc(docId);
+
+app.get("/test", (req, res) => {
+  let data = [];
+  db.collection("users")
+    .where("email", "==", "test@email")
+    .get()
+    .then((snapshot) => {
+      data.push({
+        userId: snapshot.docs[0].id,
+      });
+
+      snapshot.forEach((doc) => {
+        data.push(doc.data());
+        console.log(doc?.id);
+      });
+
+      res.json(data);
+    });
+});
+
+app.get("/getData", (req, res) => {
+  const personal = db.collection("users").doc(docId).collection("personal");
+  const menu = db.collection("users").doc(docId).collection("menu");
+
+  let userData = [];
+
+  const getPersonalData = new Promise((resolve, reject) => {
+    let data = {};
+
+    personal.onSnapshot((snapshot) => {
+      let arr = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        data: doc.data(),
+      }));
+
+      data.personal = arr[0];
+
+      resolve(data);
+      reject("Some error...");
+    });
+  });
+
+  const getMenuData = new Promise((resolve, reject) => {
+    let data = {};
+    let dishes = {},
+      dishTitles = [],
+      dishId = [];
+
+    menu.onSnapshot((snapshot) => {
+      let arr = snapshot.docs.map((doc) => {
+        dishTitles.push(doc.data().title);
+        dishId.push(doc.id);
+        return {
+          id: doc.id,
+          title: doc.data().title,
+        };
+      });
+
+      // for (let i = 0; i < dishId.length; i++) {
+      //   dishId[i].get();
+      // }
+
+      console.log(dishId, dishTitles);
+      data.menu = arr;
+
+      resolve(data);
+      reject("Some error...");
+    });
+  });
+
+  getPersonalData
+    .then((personalData) => {
+      userData.push(personalData);
+    })
+    .then(() => {
+      getMenuData
+        .then((menuData) => {
+          userData.push(menuData);
+          res.json(userData);
+        })
+        .catch((err) => console.error(err));
+    })
+    .catch((err) => console.error(err));
 });
 
 // app.get("/*", (req, res) => {
