@@ -46,12 +46,14 @@ app.get("/test", (req, res) => {
     .then((snapshot) => {
       data.push({
         userId: snapshot.docs[0].id,
+        p: snapshot.docs[0].data().personal.password,
+        userData: snapshot.docs[0].data(),
       });
 
-      snapshot.forEach((doc) => {
-        data.push(doc.data());
-        console.log(doc?.id);
-      });
+      // snapshot.forEach((doc) => {
+      //   data.push(doc.data());
+      //   console.log(doc?.id);
+      // });
 
       res.json(data);
     });
