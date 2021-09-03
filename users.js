@@ -17,8 +17,6 @@ let users = [
   },
 ];
 
-// $2a$10$yHLGBzUzES5InsEnY8umHOUb4O2SvNfqfMWZrqEEK1t49.BRMcOBe
-
 bcrypt.genSalt(10, (err, salt) => {
   if (err) throw err;
   bcrypt.hash(users[0].password, salt, (err, hash) => {
@@ -30,20 +28,19 @@ bcrypt.genSalt(10, (err, salt) => {
 
 let menu = [
   {
-    id: 0,
     categories: [
       {
-        id: 0,
+        // id: 0,
         name: "breakfast",
         timeFrom: "7:00 am",
         timeTo: "11:30 pm",
         subCategories: [
           {
-            id: 0,
+            // id: 0,
             name: "drinks",
             dishes: [
               {
-                id: 0,
+                // id: 0,
                 title: "milk shake",
                 priceHalf: "₹",
                 priceFull: "₹₹",
@@ -53,7 +50,7 @@ let menu = [
                 jainAvailable: true,
               },
               {
-                id: 1,
+                // id: 1,
                 title: "milk shake",
                 priceHalf: "₹",
                 priceFull: "₹₹",
@@ -63,7 +60,7 @@ let menu = [
                 jainAvailable: true,
               },
               {
-                id: 2,
+                // id: 2,
                 title: "milk shake",
                 priceHalf: "₹",
                 priceFull: "₹₹",
@@ -75,11 +72,11 @@ let menu = [
             ],
           },
           {
-            id: 1,
+            // id: 1,
             name: "omelets",
             dishes: [
               {
-                id: 0,
+                // id: 0,
                 title: "the abigail adams",
                 priceHalf: "₹",
                 priceFull: "₹₹",
@@ -89,7 +86,7 @@ let menu = [
                 jainAvailable: true,
               },
               {
-                id: 1,
+                // id: 1,
                 title: "the abigail adams",
                 priceHalf: "₹",
                 priceFull: "₹₹",
@@ -99,7 +96,7 @@ let menu = [
                 jainAvailable: true,
               },
               {
-                id: 2,
+                // id: 2,
                 title: "the abigail adams",
                 priceHalf: "₹",
                 priceFull: "₹₹",
@@ -113,17 +110,17 @@ let menu = [
         ],
       },
       {
-        id: 1,
+        // id: 1,
         name: "brunch",
         timeFrom: "11:30 am",
         timeTo: "1:30 pm",
         subCategories: [
           {
-            id: 0,
+            // id: 0,
             name: "pancakes",
             dishes: [
               {
-                id: 0,
+                // id: 0,
                 title: "the betsy ross",
                 priceHalf: "₹",
                 priceFull: "₹₹",
@@ -133,7 +130,7 @@ let menu = [
                 jainAvailable: true,
               },
               {
-                id: 1,
+                // id: 1,
                 title: "the betsy ross",
                 priceHalf: "₹",
                 priceFull: "₹₹",
@@ -143,7 +140,7 @@ let menu = [
                 jainAvailable: true,
               },
               {
-                id: 2,
+                // id: 2,
                 title: "the betsy ross",
                 priceHalf: "₹",
                 priceFull: "₹₹",
@@ -155,11 +152,11 @@ let menu = [
             ],
           },
           {
-            id: 1,
+            // id: 1,
             name: "pancakes",
             dishes: [
               {
-                id: 0,
+                // id: 0,
                 title: "the betsy ross",
                 priceHalf: "₹",
                 priceFull: "₹₹",
@@ -169,7 +166,7 @@ let menu = [
                 jainAvailable: true,
               },
               {
-                id: 1,
+                // id: 1,
                 title: "the betsy ross",
                 priceHalf: "₹",
                 priceFull: "₹₹",
@@ -179,7 +176,7 @@ let menu = [
                 jainAvailable: true,
               },
               {
-                id: 2,
+                // id: 2,
                 title: "the betsy ross",
                 priceHalf: "₹",
                 priceFull: "₹₹",
@@ -193,17 +190,17 @@ let menu = [
         ],
       },
       {
-        id: 2,
+        // id: 2,
         name: "lunch",
         timeFrom: "1:30 pm",
         timeTo: "4:00 pm",
         subCategories: [
           {
-            id: 0,
+            // id: 0,
             name: "pancakes",
             dishes: [
               {
-                id: 0,
+                // id: 0,
                 title: "the betsy ross",
                 priceHalf: "₹",
                 priceFull: "₹₹",
@@ -213,7 +210,7 @@ let menu = [
                 jainAvailable: true,
               },
               {
-                id: 1,
+                // id: 1,
                 title: "the betsy ross",
                 priceHalf: "₹",
                 priceFull: "₹₹",
@@ -223,7 +220,7 @@ let menu = [
                 jainAvailable: true,
               },
               {
-                id: 2,
+                // id: 2,
                 title: "the betsy ross",
                 priceHalf: "₹",
                 priceFull: "₹₹",

@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const config = require("config");
 const jwt = require("jsonwebtoken");
 
-// let { users } = require("../../users.js");
+let { menu } = require("../../users.js");
 let { db } = require("../../firebase.js");
 
 const Router = express.Router();
@@ -59,7 +59,7 @@ Router.route("/").post((req, res) => {
                   phone: [],
                   social: [],
                 },
-                menu: {},
+                menu,
               })
               .then((res) => {
                 newUser.id = res.id;
