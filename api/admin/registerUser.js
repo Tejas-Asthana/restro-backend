@@ -22,7 +22,7 @@ Router.route("/").post((req, res) => {
     // restrauntName: req.body.restrauntName,
     email: req.body.email.toString(),
     password: req.body.password.toString(),
-    id: "",
+    id: null,
     phone: [],
     social: {
       fb: "",
@@ -47,11 +47,14 @@ Router.route("/").post((req, res) => {
           bcrypt.hash(newUser.password, salt, (err, hash) => {
             if (err) throw err;
             newUser.password = hash;
-            // users.push(newUser);
+
+            let newId = db.collection("users").doc().id;
 
             db.collection("users")
-              .add({
+              .doc(newId)
+              .set({
                 email: newUser.email,
+                id: newId,
                 personal: {
                   email: newUser.email,
                   name: newUser.name,
@@ -62,7 +65,10 @@ Router.route("/").post((req, res) => {
                 menu,
               })
               .then((res) => {
-                newUser.id = res.id;
+                newUser.id = newId;
+              })
+              .catch((err) => {
+                throw err;
               });
 
             jwt.sign(

@@ -1,6 +1,6 @@
 // const path = require("path");
 const express = require("express");
-var cors = require("cors");
+const cors = require("cors");
 
 let { db } = require("./firebase");
 

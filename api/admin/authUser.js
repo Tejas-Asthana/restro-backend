@@ -21,7 +21,8 @@ Router.route("/").post((req, response) => {
     .then((document) => {
       if (!document.empty) {
         let p = document.docs[0].data().personal.password;
-        let userId = document.docs[0].data().userId;
+        let userId = document.docs[0].data().id;
+        // console.log(document.docs[0].data());
         bcrypt.compare(password, p).then((res) => {
           if (!res) {
             return response.status(400).json({ msg: "invalid credentials" });
@@ -29,14 +30,14 @@ Router.route("/").post((req, response) => {
           jwt.sign(
             { id: userId }, // put user id in token's payload
             config.get("jwtSecret"), // a secret key
-            { expiresIn: 3600 }, // expires in 1 hr
+            { expiresIn: 7200 }, // expires in 2 hr
             (err, token) => {
               if (err) throw err;
               return response.json({
                 token,
                 user: {
                   id: userId,
-                  email: email,
+                  email,
                 },
               });
             }
@@ -46,38 +47,6 @@ Router.route("/").post((req, response) => {
         return response.status(400).json({ msg: "invalid credentials" });
       }
     });
-
-  // console.log(users.length);
-  // let match = false;
-  // for (let i = 0; i < users.length; i++) {
-  //   if (users[i].email === currentUser.email) {
-  //     match = true;
-  //     bcrypt.compare(currentUser.password, users[i].password).then((res) => {
-  //       if (!res) {
-  //         return response.status(400).json({ msg: "invalid credentials" });
-  //       }
-  //       jwt.sign(
-  //         { id: users[i].id }, // put user id in token's payload
-  //         config.get("jwtSecret"), // a secret key
-  //         { expiresIn: 3600 }, // expires in 1 hr
-  //         (err, token) => {
-  //           if (err) throw err;
-  //           return response.json({
-  //             token,
-  //             user: {
-  //               id: users[i].id,
-  //               email: users[i].email,
-  //               username: users[i].username,
-  //             },
-  //           });
-  //         }
-  //       );
-  //     });
-  //   } else if (i === users.length - 1 && !match) {
-  //     return response.status(400).json({ msg: "invalid credentials" });
-  //   }
-  // }
-  // console.log(users);
 });
 
 module.exports = Router;
