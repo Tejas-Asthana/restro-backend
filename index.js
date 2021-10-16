@@ -12,6 +12,8 @@ let getReviews = require("./api/admin/getReviews.js");
 
 let authMiddleware = require("./middlewares/auth.js");
 
+let client = require("./connect.js");
+
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -25,7 +27,7 @@ app.use("/api/registerUser", registerUser);
 
 app.use("/api/authUser", authUser);
 
-app.use("/api/admin/getMenu", authMiddleware, getMenu);
+app.use("/api/admin/getMenu", getMenu);
 
 app.use("/api/admin/getUserInfo", authMiddleware, getUserInfo);
 

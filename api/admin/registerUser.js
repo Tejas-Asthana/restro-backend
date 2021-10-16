@@ -4,7 +4,8 @@ const config = require("config");
 const jwt = require("jsonwebtoken");
 
 let { menu } = require("../../users.js");
-let { db } = require("../../firebase.js");
+
+let client = require("../../connect.js");
 
 const Router = express.Router();
 
@@ -12,7 +13,7 @@ const Router = express.Router();
 // Public
 // registers a user and generates a token
 
-Router.route("/").post((req, res) => {
+Router.route("/").post(async (req, res) => {
   if (!req.body.username || !req.body.email || !req.body.password) {
     return res.status(400).json({ msg: "Enter all fields" });
   }
@@ -31,107 +32,66 @@ Router.route("/").post((req, res) => {
     },
     adress: {},
   };
-  // console.log(newUser);
 
-  db.collection("users")
-    .where("email", "==", newUser.email)
-    .get()
-    .then((snapshot) => {
-      // console.log(snapshot._size);
-      if (!snapshot.empty) {
-        return res.status(400).json({ msg: "Email already exists" });
-      } else {
-        bcrypt.genSalt(10, (err, salt) => {
+  async function run() {
+    try {
+      const db = client.db("restraunt");
+
+      console.log("Connected correctly to server");
+
+      const user = await db
+        .collection("users")
+        .find({ email: newUser.email })
+        .toArray();
+
+      if (user.length !== 0) {
+        return res.status(400).json({ user, msg: "user already exists" });
+      }
+
+      bcrypt.genSalt(10, async (err, salt) => {
+        if (err) throw err;
+
+        bcrypt.hash(newUser.password, salt, async (err, hash) => {
           if (err) throw err;
+          newUser.password = hash;
 
-          bcrypt.hash(newUser.password, salt, (err, hash) => {
-            if (err) throw err;
-            newUser.password = hash;
+          const insertUser = await db.collection("users").insertOne({
+            email: newUser.email,
+            personal: {
+              email: newUser.email,
+              name: newUser.name,
+              password: newUser.password,
+              phone: [],
+              social: [],
+            },
+            menu,
+          });
 
-            let newId = db.collection("users").doc().id;
+          console.log(insertUser.insertedId);
 
-            db.collection("users")
-              .doc(newId)
-              .set({
-                email: newUser.email,
-                id: newId,
-                personal: {
+          jwt.sign(
+            { id: insertUser.insertedId }, // put user id in token's payload
+            config.get("jwtSecret"), // a secret key
+            { expiresIn: 3600 }, // expires in 1 hr
+            (err, token) => {
+              if (err) throw err;
+              return res.json({
+                token,
+                user: {
+                  id: insertUser.insertedId,
                   email: newUser.email,
                   name: newUser.name,
-                  password: newUser.password,
-                  phone: [],
-                  social: [],
                 },
-                menu,
-              })
-              .then((res) => {
-                newUser.id = newId;
-              })
-              .catch((err) => {
-                throw err;
               });
-
-            jwt.sign(
-              { id: newUser.id }, // put user id in token's payload
-              config.get("jwtSecret"), // a secret key
-              { expiresIn: 3600 }, // expires in 1 hr
-              (err, token) => {
-                if (err) throw err;
-                return res.json({
-                  token,
-                  user: {
-                    id: newUser.id,
-                    email: newUser.email,
-                    name: newUser.name,
-                  },
-                });
-              }
-            );
-          });
+            }
+          );
         });
-      }
-    });
-
-  // let emailAlreadyExists = false;
-
-  // for (let user = 0; user < users.length; user++) {
-  //   if (users[user].email === newUser.email) {
-  //     // console.log(users[user].email);
-  //     emailAlreadyExists = true;
-  //     break;
-  //   }
-  // }
-
-  // if (!emailAlreadyExists) {
-  //   bcrypt.genSalt(10, (err, salt) => {
-  //     if (err) throw err;
-  //     bcrypt.hash(newUser.password, salt, (err, hash) => {
-  //       if (err) throw err;
-  //       newUser.password = hash;
-  //       users.push(newUser);
-
-  //       jwt.sign(
-  //         { id: newUser.id }, // put user id in token's payload
-  //         config.get("jwtSecret"), // a secret key
-  //         { expiresIn: 3600 }, // expires in 1 hr
-  //         (err, token) => {
-  //           if (err) throw err;
-  //           return res.json({
-  //             token,
-  //             user: {
-  //               id: newUser.id,
-  //               email: newUser.email,
-  //               username: newUser.username,
-  //             },
-  //           });
-  //         }
-  //       );
-  //     });
-  //   });
-  // } else {
-  //   console.log(users);
-  //   return res.status(400).json({ msg: "Email already exists" });
-  // }
+      });
+    } catch (err) {
+      console.log(err.stack);
+    }
+  }
+  run().catch(console.dir);
 });
 
 module.exports = Router;
