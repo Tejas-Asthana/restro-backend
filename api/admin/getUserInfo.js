@@ -1,24 +1,29 @@
 const express = require("express");
 const Router = express.Router();
 
-const { db } = require("../../firebase.js");
+var ObjectId = require("mongodb").ObjectId;
+let client = require("../../connect.js");
 
-Router.route("/:id").get((req, res) => {
+Router.route("/:id").get(async (req, res) => {
+  if (!req.params.id) return res.status(400).json({ msg: "incomplete params" });
+
   let userPersonalInfo = "not found";
   let reqId = req.params.id;
 
-  db.collection("users")
-    .doc(reqId)
-    .get()
-    .then((snapshot) => {
-      if (!snapshot) {
-        res.status(400).send("Email not found");
-      }
-      // console.log(snapshot.docs[0].data());
-      userPersonalInfo = snapshot?.data()?.personal;
-      delete userPersonalInfo["password"];
-      res.status(200).json({ userPersonalInfo });
-    });
+  const db = client.db("restraunt");
+
+  const user = await db
+    .collection("users")
+    .find({ _id: ObjectId(reqId) })
+    .toArray();
+
+  if (user.length === 0) {
+    return res.status(400).json({ msg: userPersonalInfo });
+  }
+
+  userPersonalInfo = user[0].personal;
+  delete userPersonalInfo["password"];
+  return res.status(200).json({ userPersonalInfo });
 });
 
 module.exports = Router;

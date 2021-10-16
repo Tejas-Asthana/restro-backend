@@ -78,7 +78,7 @@ Router.route("/").post(async (req, res) => {
               return res.json({
                 token,
                 user: {
-                  id: insertUser.insertedId,
+                  _id: insertUser.insertedId,
                   email: newUser.email,
                   name: newUser.name,
                 },

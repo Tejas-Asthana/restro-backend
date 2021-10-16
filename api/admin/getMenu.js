@@ -1,34 +1,30 @@
 const express = require("express");
 const Router = express.Router();
 
-const { db } = require("../../firebase.js");
+var ObjectId = require("mongodb").ObjectId;
+let client = require("../../connect.js");
 
-Router.route("/:id").get((req, res) => {
+Router.route("/:id").get(async (req, res) => {
   try {
-    let menu = "not found";
     if (!req.params.id) {
       res.status(400).json({ msg: "invalid request" });
     }
 
-    // console.log(req.params);
-    let reqId = req.params.id.toString();
+    let reqId = req.params.id;
 
-    db.collection("users")
-      // .where("email", "==", reqEmail)
-      .doc(reqId)
-      .get()
-      .then((snapshot) => {
-        if (!snapshot || !snapshot.data()) {
-          res.status(400).json({ msg: "id not found" });
-        } else {
-          // console.log(snapshot.data());
-          menu = snapshot?.data()?.menu;
-          res.status(200).json({ menu });
-        }
-      })
-      .catch((e) => {
-        throw e;
-      });
+    const db = client.db("restraunt");
+
+    const user = await db
+      .collection("users")
+      .find({ _id: ObjectId(reqId) })
+      .toArray();
+
+    if (user.length === 0) {
+      return res.status(400).json({ msg: userPersonalInfo });
+    }
+
+    let menu = user[0].menu;
+    return res.status(200).json({ menu });
   } catch (e) {
     throw e;
   }
