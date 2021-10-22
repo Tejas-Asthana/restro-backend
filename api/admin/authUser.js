@@ -15,12 +15,12 @@ Router.route("/").post(async (req, response) => {
   let email = req.body.email,
     password = req.body.password;
 
-  const db = client.db("restraunt");
+  const db = await client.db("restraunt");
 
   const user = await db.collection("users").find({ email }).toArray();
 
-  if (user.length !== 0) {
-    return response.status(400).json({ user, msg: "user already exists" });
+  if (user.length === 0) {
+    return response.status(400).json({ user, msg: "user does not exists" });
   }
 
   let p = user[0].personal.password;
