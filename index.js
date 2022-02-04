@@ -40,41 +40,71 @@ const io = require("socket.io")(http);
 
 let restraunts = new Map();
 
-// socket.query = {
-//   from: ...,
-//   id: ...,
-//   msg: ...,
-//
-// }
-
-let count = 0;
-
-io.on("connection", function (socket) {
-  // console.log("Client connected to the WebSocket");
-  count++;
-  if (socket.handshake.query.from === "restraunt") {
-    restraunts.set(socket.handshake.query.id, socket.id);
+io.on("connection", (socket) => {
+  // restraunt login
+  socket.on("r-login", (payload) => {
+    // console.log(socket.id, payload.data.c_id);
+    restraunts.set(payload.data.res_id, payload.data.r_s_id);
     console.log(
-      count,
-      socket.handshake.query.id,
-      ": ",
-      restraunts.get(socket.handshake.query.id)
+      `\n\nLOGIN request from restraunt db_id: ${payload.data.res_id}.`
     );
-  }
-
-  socket.on("disconnect", () => {
-    console.log("Client disconnected");
+    console.log(
+      `Restraunt db_id: ${payload.data.res_id}, r_s_id: ${restraunts.get(
+        payload.data.res_id
+      )}`
+    );
+    io.to(restraunts.get(payload.data.res_id)).emit("login-successful"); //confirm
   });
 
-  // new customer arrives
-  socket.on("new_customer", (customer) => {
-    console.log(customer);
+  // confirm order request from customer
+  socket.on("confirm_order", (payload) => {
+    io.to(payload.data.c_id).emit("order_confirmed", payload);
+    console.log(
+      `\nORDER CONFIRMATION request from customer s_id: ${payload.data.c_id} to restraunt db_id: ${payload.data.res_id}`
+    );
   });
 
-  socket.on("chat message", function (msg) {
-    console.log("Received a chat message");
-    io.emit("chat message", msg);
+  // restraunt -> customer :: new msg
+  socket.on("new_msg_r", (payload) => {
+    io.to(payload.data.c_id).emit("new_msg_r", payload);
+    console.log(
+      `\nNEW MSG received from restraunt db_id: ${payload.data.res_id} to customer r_s_id: ${payload.data.r_s_id}.`
+    );
+    console.log(`msg: ${payload.data.new_msg}`);
   });
 
-  socket.emit("new_message", "Hi there");
+  // restraunt logout
+  socket.on("r-logout", (payload) => {
+    console.log(
+      `\nLOGOUT request from restraunt db_id: ${payload.data.res_id}.`
+    );
+    restraunts.delete(socket.data.res_id);
+  });
+
+  /////////////////////// CUSTOMER ///////////////////////
+
+  // new order request from customer
+  socket.on("new_order", (payload) => {
+    console.log(
+      `\nNEW ORDER request from customer s_id: ${socket.id} to restraunt db_id: ${payload.data.res_id}.`
+    );
+    io.to(restraunts.get(payload.data.res_id)).emit("confirm_order", payload);
+  });
+
+  // customer -> restraunt :: new msg
+  socket.on("new_msg_c", (payload) => {
+    io.to(restraunts.get(payload.data.res_id)).emit(
+      "new_msg_c",
+      socket.data.new_msg
+    );
+    console.log(
+      `\nNEW MSG received from customer s_id: ${payload.data.c_id} to restraunt db_id: ${payload.data.res_id}.`
+    );
+    console.log(`msg: ${payload.data.msg}`);
+  });
+
+  socket.on("disconnecting", (e) => {
+    console.log(`Customer (${socket.id}) disconnected`);
+    // io.emit;
+  });
 });
