@@ -39,11 +39,11 @@ http.listen(port, () => {
 const io = require("socket.io")(http);
 
 let restraunts = new Map();
+let customers = new Set();
 
 io.on("connection", (socket) => {
   // restraunt login
   socket.on("r-login", (payload) => {
-    // console.log(socket.id, payload.data.c_id);
     restraunts.set(payload.data.res_id, payload.data.r_s_id);
     console.log(
       `\n\nLOGIN request from restraunt db_id: ${payload.data.res_id}.`
@@ -53,24 +53,27 @@ io.on("connection", (socket) => {
         payload.data.res_id
       )}`
     );
-    io.to(restraunts.get(payload.data.res_id)).emit("login-successful"); //confirm
+    // confirmation
+    io.to(restraunts.get(payload.data.res_id)).emit("login-successful", {
+      data: "data",
+    });
   });
 
   // confirm order request from customer
   socket.on("confirm_order", (payload) => {
     io.to(payload.data.c_id).emit("order_confirmed", payload);
     console.log(
-      `\nORDER CONFIRMATION request from customer s_id: ${payload.data.c_id} to restraunt db_id: ${payload.data.res_id}`
+      `\nORDER CONFIRMATION request from customer s_id: ${payload.data.c_s_id} to restraunt db_id: ${payload.data.res_id}`
     );
   });
 
   // restraunt -> customer :: new msg
   socket.on("new_msg_r", (payload) => {
-    io.to(payload.data.c_id).emit("new_msg_r", payload);
+    io.to(payload.data.c_s_id).emit("new_msg_rtoc", payload);
     console.log(
-      `\nNEW MSG received from restraunt db_id: ${payload.data.res_id} to customer r_s_id: ${payload.data.r_s_id}.`
+      `\nNEW MSG received from restraunt db_id: ${payload.data.res_id} to customer c_s_id: ${payload.data.c_s_id}.`
     );
-    console.log(`msg: ${payload.data.new_msg}`);
+    console.log(`msg: ${payload.data.new_msg.txt}`);
   });
 
   // restraunt logout
@@ -83,6 +86,19 @@ io.on("connection", (socket) => {
 
   /////////////////////// CUSTOMER ///////////////////////
 
+  socket.on("new_login_c", (payload) => {
+    if (!customers.has(payload.data.c_s_id)) {
+      customers.add(payload.data.c_s_id);
+      console.log(
+        "\nNew customer c_s_id: " +
+          payload.data.c_s_id +
+          " to res: " +
+          payload.data.res_id
+      );
+      io.to(restraunts.get(payload.data.res_id)).emit("new_login_c", payload);
+    }
+  });
+
   // new order request from customer
   socket.on("new_order", (payload) => {
     console.log(
@@ -93,18 +109,15 @@ io.on("connection", (socket) => {
 
   // customer -> restraunt :: new msg
   socket.on("new_msg_c", (payload) => {
-    io.to(restraunts.get(payload.data.res_id)).emit(
-      "new_msg_c",
-      socket.data.new_msg
-    );
     console.log(
-      `\nNEW MSG received from customer s_id: ${payload.data.c_id} to restraunt db_id: ${payload.data.res_id}.`
+      `\nNEW MSG received from customer c_s_id: ${payload.data.c_s_id} to restraunt db_id: ${payload.data.res_id}.`
     );
-    console.log(`msg: ${payload.data.msg}`);
+    console.log(`\nmsg: ${payload.data.txt}`);
+    io.to(restraunts.get(payload.data.res_id)).emit("new_msg_ctor", payload);
   });
 
   socket.on("disconnecting", (e) => {
     console.log(`Customer (${socket.id}) disconnected`);
-    // io.emit;
+    customers.delete(socket.id);
   });
 });

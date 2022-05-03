@@ -1,7 +1,7 @@
 {
-  "name": "restraunt_admin_backend",
+  "name": "restraunt_backend",
   "version": "1.0.0",
-  "description": "backend for restraunt admin",
+  "description": "backend for restraunt manager",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
